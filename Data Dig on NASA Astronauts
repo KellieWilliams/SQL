@@ -402,13 +402,14 @@ GROUP BY name
 HAVING total_space_flights >= 1
 ORDER BY avg_space_flight_hrs desc;
 
--list of astronauts and their years they joined NASA and whether they are still alive today.
-SELECT name, year,
+-list of astronauts, the year they joined NASA, their last reported status, and whether they are still alive today.
+SELECT name, year, status,
     CASE
-        WHEN Death_Date > 0 THEN "Passed Away"
+        WHEN Death_Date IS NOT NULL OR status = "Deceased" THEN "Passed Away"
         ELSE "Alive"
     END AS "Alive?"
 FROM astronauts
-WHERE status = "Retired" AND Year > 0;
+WHERE year IS NOT NULL
+ORDER BY year;
 
 
