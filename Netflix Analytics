@@ -1,0 +1,43 @@
+-- In this PostgreSQL code, I'm querying a database that's holding Nexflix data to answer questions about the data. 
+
+-- Example query (PostgreSQL)
+SELECT * FROM "CharlotteChaze/BreakIntoTech"."netflix_people";
+
+-- Example left join query of specific columns between two joined tables
+SELECT people.show_id, people.director, titles.title, titles.type
+    FROM "CharlotteChaze/BreakIntoTech"."netflix_people" people
+    LEFT JOIN "CharlotteChaze/BreakIntoTech"."netflix_titles_info" titles
+    ON people.show_id = titles.show_id;
+
+-- Example query to discover how many movie only titles are in the database
+SELECT COUNT(type)
+    FROM "CharlotteChaze/BreakIntoTech"."netflix_titles_info" 
+    WHERE type='Movie';
+
+-- Example query to discover the dates of the most recent batch of TV shows and/or Movies added to the database
+SELECT date_added
+    FROM "CharlotteChaze/BreakIntoTech"."netflix_titles_info" 
+    WHERE date_added IS NOT NULL
+    ORDER BY date_added DESC
+    LIMIT 20;
+
+-- Example query to show all the movies and TV shows in alphabetical order
+SELECT title
+    FROM "CharlotteChaze/BreakIntoTech"."netflix_titles_info"
+    ORDER BY title ASC;
+
+--Example query to discover the director for the movie titled "Bright Star"
+SELECT people.director, titles.title
+    FROM "CharlotteChaze/BreakIntoTech"."netflix_people" people
+    LEFT JOIN "CharlotteChaze/BreakIntoTech"."netflix_titles_info" titles
+    ON people.show_id = titles.show_id
+    WHERE titles.title = 'Bright Star';
+
+-- Example query to discover the oldest movie in the database and the year it was made
+SELECT title, date_added, release_year
+    FROM "CharlotteChaze/BreakIntoTech"."netflix_titles_info"
+    WHERE type='Movie'
+    AND date_added <=
+        (SELECT MIN(date_added)
+            FROM "CharlotteChaze/BreakIntoTech"."netflix_titles_info"
+            WHERE type='Movie');
