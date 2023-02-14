@@ -1,0 +1,76 @@
+-- Create three tables: a table of famous singer/songwriters including where they were/are from; a table of names of their famous songs; and, a table of if they are married to another singer/songwriter
+-- Then join the tables to show the singer/songwriter name, and their famous songs
+-- Then do a self join to show who they are married to
+
+-- Table of famous singer/songwriter artists and where they are from
+CREATE TABLE artists (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    last_name TEXT,
+    first_name TEXT,
+    location TEXT);
+    
+INSERT INTO artists (last_name, first_name, location) VALUES ("Yearwood", "Trisha", "Georgia, USA");
+INSERT INTO artists (last_name, first_name, location) VALUES ("Brooks", "Garth", "Oaklahoma, USA");
+INSERT INTO artists (last_name, first_name, location) VALUES ("Hill", "Faith", "Missiissippi, USA");
+INSERT INTO artists (last_name, first_name, location) VALUES ("McGraw", "Tim", "Louisiana, USA");
+INSERT INTO artists (last_name, first_name, location) VALUES ("Carter", "June", "Virginia, USA");
+INSERT INTO artists (last_name, first_name, location) VALUES ("Cash", "Jonny", "Arkansas, USA");
+INSERT INTO artists (last_name, first_name, location) VALUES ("Hartman", "Lisa", "Texas, USA");
+INSERT INTO artists (last_name, first_name, location) VALUES ("Black", "Clint", "New Jersey, USA");
+
+    
+-- Table of famous songs    
+CREATE TABLE songs (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    artist_id INTEGER,
+    song TEXT);
+
+INSERT INTO songs (artist_id, song) VALUES (1, "She's In Love with the Boy");
+INSERT INTO songs (artist_id, song) VALUES (1, "Walkaway Joe");
+INSERT INTO songs (artist_id, song) VALUES (1, "In Another's Eyes");
+INSERT INTO songs (artist_id, song) VALUES (2, "Wild Horses");
+INSERT INTO songs (artist_id, song) VALUES (2, "The River");
+INSERT INTO songs (artist_id, song) VALUES (2, "Shameless");
+INSERT INTO songs (artist_id, song) VALUES (3, "Breathe");
+INSERT INTO songs (artist_id, song) VALUES (3, "It Matters to Me");
+INSERT INTO songs (artist_id, song) VALUES (3, "There You'll Be");
+INSERT INTO songs (artist_id, song) VALUES (4, "Words are Medicine");
+INSERT INTO songs (artist_id, song) VALUES (4, "Undivided");
+INSERT INTO songs (artist_id, song) VALUES (4, "Top of the World");
+INSERT INTO songs (artist_id, song) VALUES (5, "Wings of Angels");
+INSERT INTO songs (artist_id, song) VALUES (5, "Time and Time Again");
+INSERT INTO songs (artist_id, song) VALUES (5, "The Matador");
+INSERT INTO songs (artist_id, song) VALUES (6, "(Ghost) Riders in the Sky");
+INSERT INTO songs (artist_id, song) VALUES (6, "A Boy Named Sue");
+INSERT INTO songs (artist_id, song) VALUES (6, "Folsom Prison Blues");
+INSERT INTO songs (artist_id, song) VALUES (7, "Somebody Been Lovin' Her");
+INSERT INTO songs (artist_id, song) VALUES (7, "Picking Up the Pieces");
+INSERT INTO songs (artist_id, song) VALUES (7, "Right as Rain");
+INSERT INTO songs (artist_id, song) VALUES (8, "Killin' Time");
+INSERT INTO songs (artist_id, song) VALUES (8, "Better Man");
+INSERT INTO songs (artist_id, song) VALUES (8, "When I said I Do");
+
+-- Table of artist marriages   
+CREATE TABLE married (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    artist1_id INTEGER,
+    artist2_id INTEGER);
+    
+INSERT INTO married (artist1_id, artist2_id) VALUES (1, 2);
+INSERT INTO married (artist1_id, artist2_id) VALUES (3, 4);
+INSERT INTO married (artist1_id, artist2_id) VALUES (5, 6);
+INSERT INTO married (artist1_id, artist2_id) VALUES (7, 8);
+
+-- Join tables to show the artist name and their famous songs
+SELECT artists.last_name, artists.first_name, songs.song
+    FROM artists
+    LEFT OUTER JOIN songs
+    ON artists.id = songs.artist_id
+    ORDER BY artists.last_name;
+    
+-- Self join tables to show the names of the artsts married to each other
+SELECT aa.last_name, aa.first_name, ab.last_name, ab.first_name FROM married
+    JOIN artists aa
+    ON married.artist1_id = aa.id
+    JOIN artists ab
+    ON married.artist2_id = ab.id;
