@@ -1,0 +1,174 @@
+/*  
+  This paper encapsulates our end-of-term understanding of what was learned over the course for CSU Global’s ITS410: Database Management. In this project, we are tasked with discussing our lessons learned for the term and then to exemplify our learning through a coding examples.
+
+Discussion
+
+Lessons Learned
+	This past term we learned how to interact with an SQL based database through introductory coding of MySQL. Most of the techniques were learned through Murach’s MySQL by Joel Murach (2019) and via example script exercises using MySQL’s Workbench. Over the time of the course, three lessons (amongst many) learned were SELECT and JOIN statements, how to make calculations and use functions to manipulate data, and how to create users and grant permissions to those users.
+	
+  Besides the first steps of installing MySQL Workbench, the initial understanding of how to interact with the database is through coding of the SELECT statement. This statement frames the data that is desired either for display or for calculation. The basic syntax of the SELECT statement is:
+
+•	SELECT select_list (in here the column names desired for display and/or calculations and functions can be outlined)
+•	FROM table_source (this is where we ask Workbench to look for the named columns needed in the SELECT statement)
+•	WHERE search_condition (here we can filter what rows to display based upon criteria)
+•	ORDER BY order_by_list (here we can order the rows by a column name in either ascending or descending order)
+•	LIMIT row_limit (this line limits the number of rows to return for display, this can be valuable for exceptionally large tables where only the top or bottom few rows are needed for the user).
+	Within a SELECT statement if columns from one or more tables are needed, we can apply the usage of the JOIN statement. JOIN combines columns from different tables using the join condition. An example of this would be as follows:
+•	SELECT column1, column2
+•	FROM table1 JOIN table2 ON table1.column1 = table2.column1
+
+  Tables can be joined through by both the primary key on one table and the foreign key on another table or through any user defined columns. The latter is called an ad hoc relationship.
+ 
+  When a JOIN clause is used in the FROM statement, it is implied as an inner join where only those columns on the join condition are returned for usage. Whereas if OUTER JOIN is used in the clause, then all the columns from both tables are returned. There is also the availability to use RIGHT OUTER JOIN and LEFT OUTER JOIN should only the join condition columns and the table in the first position (LEFT) in the FROM statement is used or the last position (RIGHT) in the FROM statement is used.
+
+  To make sure that any queries sent to the database remain as efficient as possible it is recommended to apply the concept of least needed. For example, instead of requesting all the columns from several tables so that data can be manipulated only from two or three columns requires a lot of extra data lookup and retrieval. It is recommended to take the time to spell out the column names needed only for the calculations and display instead of utilizing the * which will return all columns from the tables involved in the statement.
+
+  Now that we can pull the columns needed for consideration and we can filter which rows to return through the WHERE clause, we can now begin to manipulate the data through calculations and functions. Arithmetic expressions can be coded into the SELECT statement using symbols such as +, -, *, and / can be used for addition, subtraction, multiplication, and division, respectfully. Columns created using these expressions are given a default column name of the expression itself or the column can be renamed using the AS clause after the expression. Traditional, mathematical order of operations holds true in MySQL, so the use of parenthesis is recommended so that the calculation is done in the order required to obtain the results wanted.
+
+  Additionally, there are many functions available within MySQL to help manipulate data that is also written into the SELECT statement. Functions such as SUM() and AVE() will add or average, respectfully, rows within the columns defined within those functions. Again, the rows included can be filter using the WHERE clause. 
+
+  To create a sleek and efficient database, taking advantage of functions such as the TRIM() function will remove spaces from around characters in a string to reduce storage space. And utilizing the LOCATE() function instead of the COUNT() function to discover whether data exists in a table increases efficiency because LOCATE() stops the moment that the requested data is count, where COUNT() will continue through the entire table counting instances before completing.
+
+  One of the most important aspects of a database is the security of that database. Oftentimes the security risks to a database comes through a user, probably unintentionally, making a mistake because they have permissions that allow them to irrevocably change something. It is imperative that a strong backup and recovery system be in place for any database regardless of any security circumstance. However, one way to help mitigate a security issue is through the creation of users, passwords, and granting of permissions. MySQL allows for the ability to create users and grant those users permissions. This is using the CREATE USER statement. An example would look like:
+
+•	CREATE USER username IDENTIFIED BY ‘reallysecureP@ssw0rd1’
+Once a user is created, then permissions can be granted to that user through the GRANT statement. An example,
+•	GRANT SELECT, INSERT, UPDATE ON databasename.tablename TO username
+Only one table at a time can be outlined in a GRANT statement.
+
+  To utilize an administrator’s time efficiently, roles can be created within MySQL with permissions granted to those roles and then users can then be quickly assigned to roles. This decreases the amount of time needed to grant permissions for each table (if needed) for each user because permissions are already outlined for the role in which the user is assigned. Roles also allow administrators to practice the security suggestion of least privilege, where a user has the least needed privileges to perform their work role. And if a user moves from one position to another within a company, moving that user from one role to another also mitigates permissions creep where users can gain increased access because old permissions are not revoked when that user gains new ones due to the new position.
+
+  There are very many concepts that can be shared through the lessons learned. However, the introduction of how to access the data through the SELECT statement and the JOIN clause, how to manipulate that data using arithmetic and functions, and how to secure the database through backup and recovery as well as user and role permissions are key amongst the many lessons learned through CSU Global’s ITS410 Database Management course.
+
+Queries
+	The following is an exercise in MySQL script that shows our understanding of the lessons learned over the term. Example SQL is included as proof of understanding at each step.
+	Using the example "My Guitar Shop" database, develop the following queries.
+1.	Write a SELECT statement that returns these column names and data from the Products table:
+    product_name               The product_name column
+    list_price                        The list_price column
+    discount_percent            The discount_percent column
+    discount_amount            A column that is calculated from the previous two columns
+    discount_price               A column that is calculated from the previous three columns
+  Round the discount_amount and discount_price columns to two decimal places. Sort the result set by the discount_price column in descending sequence. Use the LIMIT clause so the result set contains only the first five rows. Submit a screenshot.
+*/
+
+SELECT product_name, list_price, discount_percent,
+    ROUND (list_price*discount_percent/100,2) AS discount_amount,
+    ROUND (list_price**(1-discount_percent/100,2) AS discount_price
+  FROM products
+  ORDER BY discount_price DESC
+  LIMIT 5;
+
+/*
+2.	Write a SELECT statement that returns these column names and data from the Order_Items table:
+  item_id                           The item_id column
+  item_price                      The item_price column
+  discount_amount            The discount_amount column
+  quantity                          The quantity column
+  price_total                       A column that is calculated by multiplying the item price by the quantity
+  discount_total                  A column that is calculated by multiplying the discount amount by the quantity
+  item_total                         A column that is calculated by subtracting the discount amount from the item price and then multiplying by the quantity
+  Only return rows where the item_total is greater than 500. Sort the result set by the item_total column in descending sequence.
+*/
+
+SELECT item_id, item_price, discount_amount, quantity,
+    item_price*quantity AS price_total,
+    discount_amount*quantity AS discount_total,,
+    item_price-(discount_amount*quantity) AS item_total
+  FROM order_items
+  WHERE (item_price-discount_amount)*quantity > 500
+  ORDER BY item_total DESC;
+
+/*
+3.	Write a SELECT statement that returns the product_name and list_price columns from the Products table.
+Return one row for each product that has the same list price as another product.
+*/
+
+SELECT p1.product_name, p1.list_price
+  FROM products p1
+  JOIN products p2
+    ON p1.product_id <> p2.product_id
+    AND p1.list_price = p2.list_price
+  ORDER BY product_name;
+
+/*
+4.	Write a SELECT statement that returns these two columns:
+  category_name        The category_name column from the Categories table
+  product_id               The product_id column from the Products table
+Return one row for each category that has never been used.
+*/
+
+SELECT category_name, product_id
+  FROM categories
+  LEFT JOIN products
+    ON categories.category_id = products.category_id
+  WHERE product_id IS NULL;
+
+/* 
+5.	Write an INSERT statement that adds this row to the Customers table:
+  email_address:         rick@raven.com
+  password:                (empty string)
+  first_name:                Rick
+  last_name:                 Raven
+  Use a column list for this statement. 
+*/
+
+INSERT INTO customers
+    (email_address, password, first_name, last_name)
+   VALUES
+    ('rick@raven.com', '', 'Rick', 'Raven');
+
+SELECT * FROM customers;
+
+/*
+6.	Write a SELECT statement that answers this question: Which customers have ordered more than one product? Return these columns:
+The email_address column from the Customers table
+The count of distinct products from the customer’s orders
+Sort the result set in ascending sequence by the email_address column.
+*/
+
+SELECT email_address, COUNT(DISTINCT item_id) AS count_of_distinct_products
+  FROM customers c, order_items oi, orders o
+  WHERE c.customer_id = o.customer_id
+    AND o.order_id = oi.order_id
+  GROUP BY email_address
+  ORDER BY email_address ASC;
+
+/*
+7.	Write a SELECT statement that answers this question: What is the total quantity purchased for each product within each category? Return these columns
+  The category_name column from the category table
+  The product_name column from the products table
+  The total quantity purchased for each product with orders in the Order_Items table
+  Use the WITH ROLLUP operator to include rows that give a summary for each category name as well as a row that gives the grand total.
+  Use the IF and GROUPING functions to replace null values in the category_name and product_name columns with literal values if they are for summary rows. 
+*/
+
+SELECT IF(GROUPING(catagory_name) = 1, 'Grand Total', category_name) AS category_name,
+    IF(GROUPING(product_name) = 1, 'Category Total', product_name) AS product_name,
+    COUNT(item_id)*quantity AS total_quantity_purchased
+  FROM categories c, order_items oi, products p
+  WHERE c.category_id = p.category_id
+    AND po.product_id = p.product_id
+  GROUP BY category_name, product name WITH ROLLUP;
+
+/*
+8.	Write and execute a script that creates a user with a username using your firstname initial and lastname and password of your choosing. This user should be able to connect to MySQL from any computer.
+  This user should have SELECT, INSERT, UPDATE, and DELETE privileges for the Customers, Addresses, Orders, and Order_Items tables of the My Guitar Shop database.
+  However, this user should only have SELECT privileges for the Products and Categories tables. Also, this user should not have the right to grant privileges to other users.
+  Check the privileges for the user by using the SHOW GRANTS statement.
+*/
+
+DROP USER IF EXISTS kwilliams;
+CREATE USER IF NOT EXISTS kwilliams IDENTIFIED BY 'reallysecureP@ssw0rd!';
+GRANT SELECT, INSERT, UPDATE, DELETE ON my_guitar_shop.customers TO kwilliams;
+GRANT SELECT, INSERT, UPDATE, DELETE ON my_guitar_shop.addresses TO kwilliams;
+GRANT SELECT, INSERT, UPDATE, DELETE ON my_guitar_shop.orders TO kwilliams;
+GRANT SELECT, INSERT, UPDATE, DELETE ON my_guitar_shop.order_items TO kwilliams;
+GRANT SELECT ON my_guitar_shop.products TO kwilliams;
+GRANT SELECT ON my_guitar_shop.categories TO kwilliams;
+SHOW GRANTS FOR kwilliams;
+
+/*
+Reference
+Murach, J. (2019). Murach’s MySQL (3rd ed.). Mike Murach & Associates, Inc.
+*/
