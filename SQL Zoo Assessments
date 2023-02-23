@@ -58,3 +58,18 @@ ON c.Caller_id = i.Caller_id
 WHERE i.call_date IS NULL
 OR i.call_date = '';
 
+--8. For each customer show: Company name, contact name, number of calls where the number of calls is fewer than 5
+WITH CTE AS (
+SELECT Cu.Company_name, CONCAT(Ca.Last_name, ', ', Ca.First_name) AS Contact_Name, i.Call_ref 
+FROM Issue i
+JOIN Caller Ca
+ON i.Caller_id = Ca.Caller_id
+JOIN Customer Cu
+ON Ca.Company_ref = Cu.Company_ref
+)
+
+SELECT Company_name, MIN(Contact_Name) AS Contact, COUNT(Call_ref) AS Call_Count
+FROM CTE
+GROUP BY Company_name
+HAVING COUNT(Call_ref) < 5;
+
