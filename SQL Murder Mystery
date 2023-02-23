@@ -1,0 +1,172 @@
+-- Partners Joon Park and Cathy He created the SQL Murder Mystery for those who want to test their SQL skills in deducing a murderer via SQL programming statements to dig through the data. The following are the steps I took and their results in order to solve the mystery.
+
+SELECT * FROM crime_scene_report
+WHERE date = 20180115
+AND type = 'murder'
+AND city like '%SQL City%';
+
+--20180115	murder	Security footage shows that there were 2 witnesses. The first witness lives at the last house on "Northwestern Dr". The second witness, named Annabel, lives somewhere on "Franklin Ave".	SQL City
+
+SELECT * FROM person
+WHERE name like '%Annabel%'
+AND address_street_name like '%Franklin Ave%';
+
+--id	name	license_id	address_number	address_street_name	ssn
+--16371	Annabel Miller	490173	103	Franklin Ave	318771143
+
+SELECT * FROM person
+WHERE address_street_name like '%Franklin Ave%'
+ORDER BY address_number DESC
+LIMIT 1;
+
+--id	name	license_id	address_number	address_street_name	ssn
+--24737	Gema Nantz	273410	3968	Franklin Ave	180545802
+
+SELECT p.name, p.address_number, p.address_street_name, i.transcript
+FROM person p
+LEFT JOIN interview i
+ON p.id = i.person_id
+WHERE name like '%Annabel%'
+AND address_street_name like '%Franklin Ave%';
+
+--name	address_number	address_street_name	transcript
+--Annabel Miller	103	Franklin Ave	I saw the murder happen, and I recognized the killer from my gym when I was working out last week on January the 9th.
+
+SELECT p.name, p.address_number, p.address_street_name, i.transcript
+FROM person p
+LEFT JOIN interview i
+ON p.id = i.person_id
+WHERE address_street_name like '%Franklin Ave%'
+ORDER BY address_number ASC
+LIMIT 1;
+
+--name	address_number	address_street_name	transcript
+--Omer Andreoni	13	Franklin Ave	‘I haven’t the least idea what you’re talking about,’ said Alice.	
+
+SELECT c.check_in_date, c.check_in_time, c.check_out_time, m.name
+FROM get_fit_now_check_in c
+LEFT JOIN get_fit_now_member m
+ON c.membership_id = m.id
+WHERE m.name like '%Annabel Miller%';
+
+--check_in_date	check_in_time	check_out_time	name
+--20180109	1600	1700	Annabel Miller
+
+SELECT c.check_in_date, c.check_in_time, c.check_out_time, m.name
+FROM get_fit_now_check_in c
+LEFT JOIN get_fit_now_member m
+ON c.membership_id = m.id
+WHERE check_in_date = 20180109;
+
+--check_in_date	check_in_time	check_out_time	name
+--20180109	957	1164	Shondra Ledlow
+--20180109	344	518	Zackary Cabotage
+--20180109	486	1124	Sarita Bartosh
+--20180109	461	944	Adriane Pelligra
+--20180109	399	515	Burton Grippe
+--20180109	273	885	Blossom Crescenzo
+--20180109	367	959	Carmen Dimick
+--20180109	1600	1730	Joe Germuska
+--20180109	1530	1700	Jeremy Bowers
+--20180109	1600	1700	Annabel Miller
+
+SELECT p.name, p.address_number, p.address_street_name, i.transcript
+FROM person p
+LEFT JOIN interview i
+ON p.id = i.person_id
+WHERE name like 'Alice%';
+
+--name	address_number	address_street_name	transcript
+--Alice Lekberg	3015	Erins Ridge Ave	null
+
+SELECT p.name, f.*
+FROM facebook_event_checkin f
+LEFT JOIN person p
+ON f.person_id = p.id
+WHERE p.name like '%Alice Lekberg%'
+OR p.name like '%Omer Andreoni%'
+ORDER BY date DESC;
+
+--name	person_id	event_id	event_name	date
+--Alice Lekberg	68926	6131	except study for that instructor's course.	20180124
+--Omer Andreoni	93947	4252	Shining with all his might:	20171218
+--Alice Lekberg	68926	2021	"Even the best of friends cannot attend each other's funeral."	20170522
+--Omer Lekberg	68926	1994	Ten years of rejection slips is nature's way of telling you to stop	20170111
+
+SELECT p.name, p.address_number, p.address_street_name, i.transcript
+FROM person p
+LEFT JOIN interview i
+ON p.id = i.person_id
+WHERE name like 'Jeremy Bowers%';
+
+name	address_number	address_street_name	transcript
+Jeremy Bowers	530	Washington Pl, Apt 3A	I was hired by a woman with a lot of money. I don't know her name but I know she's around 5'5" (65") or 5'7" (67"). She has red hair and she drives a Tesla Model S. I know that she attended the SQL Symphony Concert 3 times in December 2017.
+
+SELECT p.name, dl.*
+FROM drivers_license dl
+LEFT JOIN person p
+ON dl.id = p.license_id
+WHERE hair_color = 'red'
+AND car_make = 'Tesla'
+AND car_model like '%S%'
+AND height >= 65
+AND height <= 67;
+
+--name	id	age	height	eye_color	hair_color	gender	plate_number	car_make	car_model
+--Miranda Priestly	202298	68	66	green	red	female	500123	Tesla	Model S
+--Regina George	291182	65	66	blue	red	female	08CM64	Tesla	Model S
+--Red Korb	918773	48	65	black	red	female	917UU3	Tesla	Model S
+
+SELECT p.name, COUNT(f.person_id), f.*
+FROM facebook_event_checkin f
+LEFT JOIN person p
+ON f.person_id = p.id
+WHERE event_name like '%SQL Symphony Concert'
+AND f.date >= 20171201
+AND f.date <= 20171231
+GROUP BY p.name
+ORDER BY COUNT(f.person_id) DESC;
+
+--name	COUNT(f.person_id)	person_id	event_id	event_name	date
+--Bryan Pardo	3	24556	1143	SQL Symphony Concert	20171224
+--Miranda Priestly	3	99716	1143	SQL Symphony Concert	20171229
+--Denyse Bloomgren	2	28582	1143	SQL Symphony Concert	20171215
+--Avery Spieler	1	62596	1143	SQL Symphony Concert	20171225
+--Bret Windler	1	43366	1143	SQL Symphony Concert	20171207
+--Cheri Kitty	1	24397	1143	SQL Symphony Concert	20171208
+--Elmer Rosell	1	19260	1143	SQL Symphony Concert	20171214
+--Enedina Cassells	1	58898	1143	SQL Symphony Concert	20171220
+--Enrique Feltes	1	19292	1143	SQL Symphony Concert	20171213
+--Freida Betschart	1	92343	1143	SQL Symphony Concert	20171212
+--Jeremy Bowers	1	67318	1143	SQL Symphony Concert	20171206
+--Ken Whitted	1	11173	1143	SQL Symphony Concert	20171223
+--Odis Manteca	1	81526	1143	SQL Symphony Concert	20171202
+--Randell Staheli	1	79312	1143	SQL Symphony Concert	20171203
+--Sanjuanita Gorius	1	69699	1143	SQL Symphony Concert	20171214
+--Tyson Ojard	1	69325	1143	SQL Symphony Concert	20171206
+
+SELECT p.name, dl.*
+FROM drivers_license dl
+LEFT JOIN person p
+ON dl.id = p.license_id
+WHERE p.name = 'Miranda Priestly';
+
+--name	id	age	height	eye_color	hair_color	gender	plate_number	car_make	car_model
+--Miranda Priestly	202298	68	66	green	red	female	500123	Tesla	Model S
+
+SELECT p.*, i.annual_income
+FROM income i
+LEFT JOIN person p
+ON i.ssn = p.ssn
+WHERE p.name = 'Miranda Priestly';
+
+--id	name	license_id	address_number	address_street_name	ssn	annual_income
+--99716	Miranda Priestly	202298	1883	Golden Ave	987756388	310000
+
+INSERT INTO solution VALUES (1, 'Miranda Priestly');
+        
+        SELECT value FROM solution;
+
+--value
+--Congrats, you found the brains behind the murder! Everyone in SQL City hails you as the greatest SQL detective of all time. Time to break out the champagne!
+
