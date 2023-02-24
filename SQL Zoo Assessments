@@ -59,6 +59,7 @@ WHERE i.call_date IS NULL
 OR i.call_date = '';
 
 --8. For each customer show: Company name, contact name, number of calls where the number of calls is fewer than 5
+
 WITH CTE AS (
 SELECT Cu.Company_name, CONCAT(Ca.Last_name, ', ', Ca.First_name) AS Contact_Name, i.Call_ref 
 FROM Issue i
@@ -101,3 +102,14 @@ COUNT(DISTINCT Staff_code) AS Crew_Level
 FROM Staff_Count_CTE
 GROUP BY Shift_date, Shift_type;
 
+--10. Caller 'Harry' claims that the operator who took his most recent call was abusive and insulting. Find out who took the call (full name) and when.
+
+SELECT i.Call_date, s.First_name, s.Last_name
+FROM Caller c
+JOIN Issue i
+ON c.Caller_id = i.Caller_id
+JOIN Staff s
+ON i.Taken_by = s.Staff_code
+WHERE c.First_name like '%Harry%'
+ORDER BY i.Call_date DESC
+LIMIT 1;
