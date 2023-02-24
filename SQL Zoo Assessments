@@ -113,3 +113,10 @@ ON i.Taken_by = s.Staff_code
 WHERE c.First_name like '%Harry%'
 ORDER BY i.Call_date DESC
 LIMIT 1;
+
+--Guest House Assessment
+--1. Guest 1183. Give the booking_date and the number of nights for guest 1183.
+
+SELECT booking_date, nights
+FROM booking
+WHERE guest_id = 1183;
