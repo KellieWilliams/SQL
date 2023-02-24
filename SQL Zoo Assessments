@@ -73,3 +73,31 @@ FROM CTE
 GROUP BY Company_name
 HAVING COUNT(Call_ref) < 5;
 
+--9. For each shift show the number of staff assigned. Beware that some roles may be NULL and that he same person might have been assigned to multiple roles (The roles are 'Manager', 'Operator', 'Engineer1', 'Engineer2).
+
+WITH Staff_Count_CTE AS (
+SELECT Staff_code, Shift_date, Shift_Type
+FROM Staff
+JOIN Shift
+ON Shift.Manager = Staff.Staff_code
+UNION
+SELECT Staff_code, Shift_date, Shift_Type
+FROM Staff
+JOIN Shift
+ON Shift.Operator = Staff.Staff_code
+UNION
+SELECT Staff_code, Shift_date, Shift_Type
+FROM Staff
+JOIN Shift
+ON Shift.Engineer1 = Staff.Staff_code
+UNION
+SELECT Staff_code, Shift_date, Shift_Type
+FROM Staff
+JOIN Shift
+ON Shift.Engineer2 = Staff.Staff_code)
+
+SELECT Shift_date, Shift_type,
+COUNT(DISTINCT Staff_code) AS Crew_Level
+FROM Staff_Count_CTE
+GROUP BY Shift_date, Shift_type;
+
