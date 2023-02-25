@@ -129,3 +129,85 @@ JOIN guest
 ON booking.guest_id = guest.id
 WHERE booking_date like '2016-11-05%'
 ORDER BY arrival_time ASC;
+
+--3. Look up daily rates. Give the daily rate that should be paid for bookings with ids 5152, 5165, 5154 and 5295. Include booking id, room type, number of occupants and the amount.
+
+SELECT b.booking_id, b.room_type_requested, b.occupants, r.amount
+  FROM rate r
+LEFT JOIN booking b
+ON r.occupancy = b.occupants
+  AND r.room_type = b.room_type_requested
+WHERE b.booking_id = 5152
+  OR b.booking_id = 5165
+  OR b.booking_id = 5154
+  OR b.booking_id = 5295;
+
+--4. Who’s in 101? Find who is staying in room 101 on 2016-12-03, include first name, last name and address.
+
+SELECT g.first_name, g.last_name, g.address
+  FROM guest g
+JOIN booking b
+  ON g.id = b.guest_id
+WHERE b.room_no = 101
+  AND b.booking_date like '2016-12-03%';
+
+--5. How many bookings, how many nights? For guests 1185 and 1270 show the number of bookings made and the total number of nights. Your output should include the guest id and the total number of bookings and the total number of nights.
+
+SELECT b.guest_id, COUNT(b.guest_id)AS Bookings, SUM(b.nights) AS Nights
+FROM booking b
+WHERE b.guest_id = 1185
+  OR b.guest_id = 1270
+GROUP BY b.guest_id;
+
+--6. Ruth Cadbury. Show the total amount payable by guest Ruth Cadbury for her room bookings. You should JOIN to the rate table using room_type_requested and occupants.
+
+SELECT SUM(b.nights * r.amount) AS Amount_Payable
+FROM rate r
+JOIN booking b
+  ON r.room_type = b.room_type_requested
+  AND r.occupancy = b.occupants
+JOIN guest g
+  ON b.guest_id = g.id
+WHERE g.first_name like '%Ruth%'
+  AND g.last_name like '%Cadbury%'
+GROUP BY g.first_name, g.last_name;
+
+--7. Including Extras. Calculate the total bill for booking 5346 including extras.
+
+SELECT SUM(b.nights * r.amount) + SUM(e.amount) AS Total_Bill
+FROM rate r
+JOIN booking b
+  ON r.room_type = b.room_type_requested
+  AND r.occupancy = b.occupants
+JOIN extra e
+  ON b.booking_id = e.booking_id
+WHERE b.booking_id = 5346;
+
+--8. Edinburgh Residents. For every guest who has the word “Edinburgh” in their address show the total number of nights booked. Be sure to include 0 for those guests who have never had a booking. Show last name, first name, address and number of nights. Order by last name then first name.
+
+SELECT g.last_name, g.first_name, g.address, ISNULL(SUM(b.nights), 0) AS Total_Nights
+  FROM guest g
+LEFT JOIN booking b
+  ON g.id = b.guest_id
+WHERE g.address like '%Edinburgh%'
+GROUP BY g.last_name, g.first_name, g.address
+ORDER BY g.last_name, g.first_name;
+
+--9. How busy are we? For each day of the week beginning 2016-11-25 show the number of bookings starting that day. Be sure to show all the days of the week in the correct order.
+
+SELECT CAST(booking_date AS char(10)) AS Date, COUNT(booking_id) AS Bookings
+FROM booking
+WHERE booking_date >= '2016-11-25'
+GROUP BY booking_date
+ORDER BY booking_date ASC;
+
+--10. How many guests? Show the number of guests in the hotel on the night of 2016-11-21. Include all occupants who checked in that day but not those who checked out.
+
+SELECT 
+SUM(
+  CASE
+    WHEN '2016-11-21' BETWEEN booking_date AND DATEADD(day, nights-1, booking_date)
+      THEN occupants
+  ELSE 0
+END) AS Occupants
+FROM booking;
