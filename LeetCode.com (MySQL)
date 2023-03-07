@@ -1,0 +1,92 @@
+--The following are example questions posed by the Leetcode.com website.
+--My Leetcode.com profile showing my earned badges and solved problems is here: https://leetcode.com/krwilliams/
+
+-- Big Countries: Write an SQL query to report the name, population, and area of the big countries.
+--A country is big if:
+--it has an area of at least three million (i.e., 3000000 km2), or
+--it has a population of at least twenty-five million (i.e., 25000000).
+--Return the result table in any order.
+
+SELECT name, population, area
+FROM World
+WHERE area >= 3000000
+    OR population >= 25000000;
+
+--Recyclable and Low Fat Products: Write an SQL query to find the ids of products that are both low fat and recyclable. Return the result table in any order.
+
+SELECT product_id
+FROM Products
+WHERE low_fats = 'Y'
+    AND recyclable = 'Y';
+
+--Find Customer Referee: Write an SQL query to report the names of the customer that are not referred by the customer with id = 2. Return the result table in any order.
+
+SELECT name
+FROM Customer
+WHERE referee_id IS NULL
+    OR referee_id != 2;
+
+--Customers Who Never Order: Write an SQL query to report all customers who never order anything. Return the result table in any order.
+
+SELECT Customers.name AS Customers
+FROM Customers
+LEFT JOIN Orders
+    ON customers.id = Orders.customerId
+WHERE Orders.id IS NULL;
+
+--Calculate Special Bonus: Write an SQL query to calculate the bonus of each employee. The bonus of an employee is 100% of their salary if the ID of the employee is an odd number and the employee name does not start with the character 'M'. The bonus of an employee is 0 otherwise. Return the result table ordered by employee_id.
+
+SELECT employee_id, 
+    CASE
+        WHEN MOD(employee_id,2)=1 AND SUBSTRING(name, 1, 1) != 'M'
+            THEN salary
+        ELSE 0
+    END AS bonus
+FROM Employees
+ORDER BY employee_id ASC;
+
+--Swap Salary: Write an SQL query to swap all 'f' and 'm' values (i.e., change all 'f' values to 'm' and vice versa) with a single update statement and no intermediate temporary tables. Note that you must write a single update statement, do not write any select statement for this problem.
+
+UPDATE Salary
+    SET sex = (
+        CASE
+            WHEN sex = 'f' THEN 'm'
+            ELSE 'f'
+        END);
+
+--Delete Duplicate Emails: Write an SQL query to delete all the duplicate emails, keeping only one unique email with the smallest id. Note that you are supposed to write a DELETE statement and not a SELECT one.
+--After running your script, the answer shown is the Person table. The driver will first compile and run your piece of code and then show the Person table. The final order of the Person table does not matter.
+
+DELETE p1 from Person p1
+INNER JOIN Person p2
+WHERE
+    p1.id > p2.id AND
+    p1.email = p2.email;
+
+--Fix Names in a Table: Write an SQL query to fix the names so that only the first character is uppercase and the rest are lowercase. Return the result table ordered by user_id.
+
+SELECT user_id, 
+    CONCAT(UPPER(LEFT(name, 1)),
+           LOWER(SUBSTRING(name, 2))
+          ) as name
+FROM USERS
+ORDER BY user_id ASC;
+
+--Group Sold Products By The Date: Write an SQL query to find for each date the number of different products sold and their names. The sold products names for each date should be sorted lexicographically. Return the result table ordered by sell_date.
+
+SELECT sell_date,
+    COUNT(distinct product) AS num_sold,
+    GROUP_CONCAT(distinct product
+        ORDER BY product ASC
+        SEPARATOR ',') AS products
+FROM Activities
+GROUP BY sell_date
+ORDER BY sell_date ASC;
+
+--Patients With a Condition: Write an SQL query to report the patient_id, patient_name and conditions of the patients who have Type I Diabetes. Type I Diabetes always starts with DIAB1 prefix. Return the result table in any order.
+
+SELECT Patients.patient_id, patient_name, conditions
+FROM Patients
+WHERE conditions LIKE 'DIAB1%'
+    OR conditions LIKE '% DIAB1%';
+
