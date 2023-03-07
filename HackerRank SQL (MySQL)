@@ -1,5 +1,5 @@
 --The following are example SQL queries posed by the website HackerRank.com in their Prepare module, answered using MySQL.
---My HackerRank profile page showing my badges is here: https://www.hackerrank.com/krwilliams
+--My HackerRank profile page showing my badges and certificates is here: https://www.hackerrank.com/krwilliams
 
 --Revising the SELECT Query I: Query all columns for all American cities in the CITY table with populations larger than 100000. The CountryCode for America is USA.
 
