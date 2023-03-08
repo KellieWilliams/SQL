@@ -1,0 +1,171 @@
+--Final SQL Project from CC DA Certification (SQLite Studio)
+--Working with a dataset called chinook, which represents a digital media store and includes tables for artists, albums, media tracks, invoices, and customers; answer the following:
+
+--1. Show Customers (their full names, customer ID, and country) who are not in the US. (Hint: != or <> can be used to say "is not equal to").
+SELECT FirstName, LastName, CustomerID, Country
+FROM customers
+WHERE country <> 'USA';
+
+--2. Show only the Customers from Brazil.
+SELECT Company
+FROM customers
+WHERE country = 'Brazil'
+    AND Company IS NOT NULL;
+    
+--3. Find the Invoices of customers who are from Brazil. The resulting table should show the customer's full name, Invoice ID, Date of the invoice, and billing country.
+SELECT FirstName, LastName, invoiceid, InvoiceDate, BillingCountry
+FROM customers
+JOIN invoices
+    ON customers.Customerid = invoices.CustomerId
+WHERE customers.country = 'Brazil';
+
+--4. Show the Employees who are Sales Agents.
+SELECT LastName, FirstName
+FROM employees
+WHERE Title LIKE '%Sales%Agent%';
+
+--5. Find a unique/distinct list of billing countries from the Invoice table.
+SELECT DISTINCT BillingCountry from invoices;
+
+--6. Provide a query that shows the invoices associated with each sales agent. The resulting table should include the Sales Agent's full name.
+SELECT invoices.invoiceid, employees.FirstName, employees.LastName
+FROM employees
+JOIN customers
+    ON employees.Employeeid = customers.SupportRepID
+JOIN invoices
+    ON customers.Customerid = invoices.CustomerId;
+    
+--7. Show the Invoice Total, Customer name, Country, and Sales Agent name for all invoices and customers.
+SELECT
+    ii.invoiceid
+    , SUM(ii.UnitPrice*ii.Quantity) AS Invoice_Total
+    , c.LastName || ', ' || c.FirstName AS Customer_name
+    , e.LastName || ', ' || e.FirstName AS Sales_Agent
+FROM invoice_items ii
+JOIN invoices i
+    ON ii.invoiceid = i.invoiceid
+JOIN customers c
+    ON i.Customerid = c.Customerid
+JOIN employees e
+    ON c.SupportRepid = e.Employeeid
+GROUP BY ii.Invoiceid;
+
+--8. How many Invoices were there in 2009?
+SELECT COUNT(Invoiceid)
+FROM invoices
+WHERE InvoiceDate >= '2009-01-01'
+    AND InvoiceDate < '2010-01-01';
+
+--9. What are the total sales for 2009?
+SELECT SUM(ii.UnitPrice*ii.Quantity) AS Total_Sales
+FROM invoice_items ii
+JOIN invoices i
+    ON ii.Invoiceid = i.Invoiceid
+WHERE i.InvoiceDate >= '2009-01-01'
+    AND i.InvoiceDate < '2010-01-01';
+
+--10. Write a query that includes the purchased track name with each invoice line ID.
+SELECT t.name, ii.InvoiceLineID
+FROM invoice_items ii
+JOIN tracks t
+    ON ii.TrackId = t.TrackId;
+
+--11. Write a query that includes the purchased track name AND artist name with each invoice line ID.
+SELECT t.Name AS Track_Name
+    , art.Name AS Artist_Name
+    , ii.InvoiceLineID
+FROM invoice_items ii
+JOIN tracks t
+    ON ii.TrackId = t.TrackId
+JOIN albums alb
+    ON t.AlbumId = alb.AlbumId
+JOIN artists art
+    ON alb.ArtistId = art.ArtistID;
+
+--12. Provide a query that shows all the Tracks, and include the Album name, Media type, and Genre.
+SELECT t.Name AS Track_Name
+    , alb.Title AS Album_Title
+    , mt.Name AS Media_Type
+    , g.Name AS Genre
+FROM tracks t
+JOIN albums alb
+    , media_types mt
+    , genres g
+ON t.AlbumId = alb.AlbumID
+    AND t.MediaTypeID = mt.MediaTypeID
+    AND t.GenreID = g.GenreID;
+
+--13. Show the total sales made by each sales agent.
+SELECT ROUND(SUM(ii.UnitPrice*ii.Quantity),2) AS Total_Sales
+    , e.LastName || ', ' || e.FirstName AS Sales_Agent
+FROM invoice_items ii
+JOIN invoices i
+    ON ii.InvoiceID = i.InvoiceID
+JOIN customers c
+    ON i.CustomerID = c.CustomerID
+JOIN employees e
+    ON c.SupportRepID = e.EmployeeID
+GROUP BY e.EmployeeID;
+
+--14. Which sales agent made the most dollars in sales in 2009?
+SELECT ROUND(SUM(ii.UnitPrice*ii.Quantity),2) AS Total_Sales
+    , e.LastName || ', ' || e.FirstName AS Sales_Agent
+FROM invoice_items ii
+JOIN invoices i
+    ON ii.InvoiceID = i.InvoiceID
+JOIN customers c
+    ON i.CustomerID = c.CustomerID
+JOIN employees e
+    ON c.SupportRepID = e.EmployeeID
+WHERE i.InvoiceDate >= '2009-01-01'
+    AND i.InvoiceDate < '2010-01-01'
+GROUP BY e.EmployeeID
+ORDER BY Total_Sales DESC
+LIMIT 1;
+
+--Now come up with your own queries as a Data Analyst would.
+--1. Which track made the most money total in 2009?
+SELECT ROUND(SUM(ii.UnitPrice*ii.Quantity),2) AS Total_Sales
+    , t.Name AS Track_Name
+FROM invoices i
+JOIN invoice_items ii
+    ON i.InvoiceID = ii.InvoiceID
+JOIN tracks t
+    ON ii.TrackID = t.TrackID
+WHERE i.InvoiceDate >= '2009-01-01'
+    AND i.InvoiceDate < '2010-01-01'
+GROUP BY Track_Name
+ORDER BY Total_Sales DESC
+LIMIT 1;
+
+--3. What tracks are in the playlist named 'TV Shows'?
+SELECT p.Name AS Playlist
+    , t.Name AS Track_Name
+FROM playlists p
+JOIN playlist_track pt
+    ON p.PlaylistId = pt.PlaylistId
+JOIN tracks t
+    ON pt.TrackId = t.TrackId
+WHERE p.Name = 'TV Shows';
+
+--4. Which media type has generated the most revenue overall?
+SELECT mt.Name AS Media_Type
+    , ROUND(SUM(ii.UnitPrice*Quantity),2) AS Revenue
+FROM invoice_items ii
+JOIN tracks t
+    ON ii.TrackID = t.TrackID
+JOIN media_types mt
+    ON t.MediaTypeId = mt.MediaTypeId
+GROUP BY mt.Name
+ORDER BY Revenue DESC
+LIMIT 1;
+
+--5. How many tracks are in each playlist?
+SELECT p.PlaylistId AS Playlist_ID
+    , p.Name AS Playlist
+    , COUNT(pt.TrackID) AS Num_of_Tracks
+FROM playlists p
+JOIN playlist_track pt
+    ON p.PlaylistId = pt.PlaylistId
+GROUP BY p.PlaylistId
+ORDER BY Playlist ASC;
